@@ -13,102 +13,119 @@ body{
 }
 
 .container{
-  padding:20px;
+  padding:18px;
   display:flex;
   flex-direction:column;
-  gap:20px;
-}
-
-/* CONTROLS */
-.controls{
-  background:#fff;
-  padding:12px;
-  border-radius:12px;
-  display:flex;
-  gap:10px;
+  gap:18px;
 }
 
 /* KPI */
 .kpis{
   display:grid;
   grid-template-columns:repeat(5,1fr);
-  gap:15px;
+  gap:14px;
 }
 
 .kpi{
   background:#fff;
   border-radius:14px;
-  padding:15px;
-  box-shadow:0 4px 10px rgba(0,0,0,.08);
+  padding:16px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+  transition:.2s;
 }
 
-.kpi .title{font-size:13px;color:#666}
-.kpi .value{font-size:26px;font-weight:700}
-.kpi.blue{border:2px solid #3b82f6}
-.kpi.yellow{border:2px solid #f59e0b}
-.kpi.red{border:2px solid #ef4444}
-
-/* CHARTS */
-.row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:20px;
+.kpi .title{
+  font-size:13px;
+  color:#6b7280;
+  margin-bottom:6px;
 }
 
+.kpi .value{
+  font-size:28px;
+  font-weight:700;
+  color:#111827;
+}
+
+/* Highlight cards */
+.kpi.blue{
+  background:#3b82f6;
+  color:#fff;
+}
+.kpi.yellow{
+  background:#f59e0b;
+  color:#fff;
+}
+.kpi.red{
+  background:#ef4444;
+  color:#fff;
+}
+
+/* Cards */
 .card{
   background:#fff;
   border-radius:14px;
-  padding:15px;
-  box-shadow:0 4px 10px rgba(0,0,0,.08);
+  padding:16px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
 }
 
-/* PHASE */
+/* Chart layout */
+.row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
+
+/* Phase */
 .phase{
   display:grid;
   grid-template-columns:1fr 1fr 1fr;
-  gap:20px;
+  gap:18px;
 }
 
 .phase-card{
-  padding:15px;
+  padding:16px;
   border-radius:14px;
-  box-shadow:0 4px 10px rgba(0,0,0,.08);
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
 }
 
-.phaseR{background:#ffe5e5}
-.phaseY{background:#fff7d6}
-.phaseB{background:#e5edff}
+.phaseR{background:#fde2e2}
+.phaseY{background:#fff7cc}
+.phaseB{background:#e2ecff}
 
 /* bars */
-.bar{height:6px;background:#ddd;border-radius:6px;margin:6px 0}
-.fill{height:100%;border-radius:6px}
+.bar{
+  height:7px;
+  background:#e5e7eb;
+  border-radius:6px;
+  margin:8px 0;
+}
+.fill{
+  height:100%;
+  border-radius:6px;
+}
+
 .red{background:#ef4444}
 .yellow{background:#f59e0b}
 .blue{background:#3b82f6}
 
-/* TABLE */
+/* Table */
 .table-card{
   background:#fff;
   border-radius:14px;
-  padding:15px;
-  box-shadow:0 4px 10px rgba(0,0,0,.08);
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
+  padding:16px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
 }
 
 th{
   background:#f3f4f6;
   padding:10px;
-  font-size:13px;
+  font-size:12px;
 }
 
 td{
   padding:10px;
   border-bottom:1px solid #eee;
-  text-align:center;
+  font-size:13px;
 }
 
 /* PF COLOR */
@@ -249,18 +266,69 @@ function charts(hourly){
 const x=hourly.map(h=>new Date(h.ts));
 
 Plotly.newPlot("energyChart",[
-{ x,y:hourly.map(h=>h.energy),type:"bar",name:"Consumption (kWh)"},
-{ x,y:hourly.map(h=>h.production),type:"scatter",name:"Production",yaxis:"y2"}
-]);
-
-Plotly.newPlot("powerChart",[
-{ x,y:hourly.map(h=>h.avgPower),name:"kW",mode:"lines"},
-{ x,y:hourly.map(h=>h.avgPF),name:"PF",mode:"lines",yaxis:"y2"}
+{
+x,
+y:hourly.map(h=>h.energy),
+type:"bar",
+name:"Consumption (kWh)",
+marker:{color:"#3b82f6"}
+},
+{
+x,
+y:hourly.map(h=>h.production),
+type:"scatter",
+name:"Production (Nos)",
+yaxis:"y2",
+line:{color:"#10b981",width:2}
+}
 ],
 {
-yaxis:{title:"kW"},
+margin:{l:40,r:40,t:10,b:30},
+paper_bgcolor:"#fff",
+plot_bgcolor:"#fff",
+yaxis:{gridcolor:"#e5e7eb"},
+yaxis2:{overlaying:"y",side:"right"},
+legend:{orientation:"h",y:-0.2}
+});
+
+/* Power chart */
+Plotly.newPlot("powerChart",[
+{
+x,
+y:hourly.map(h=>h.avgPower),
+name:"Active Power (kW)",
+mode:"lines",
+line:{color:"#2563eb",width:2}
+},
+{
+x,
+y:hourly.map(h=>h.avgPF),
+name:"Power Factor",
+mode:"lines",
+yaxis:"y2",
+line:{color:"#7c3aed",width:2}
+}
+],
+{
+margin:{l:40,r:40,t:10,b:30},
+paper_bgcolor:"#fff",
+plot_bgcolor:"#fff",
+yaxis:{title:"kW",gridcolor:"#e5e7eb"},
 yaxis2:{overlaying:"y",side:"right",range:[0.8,1]},
-shapes:[{type:"line",y0:0.95,y1:0.95,x0:x[0],x1:x.at(-1),line:{dash:"dot"}}]
+shapes:[{
+type:"line",
+y0:0.95,y1:0.95,
+x0:x[0],x1:x.at(-1),
+line:{dash:"dot",color:"#f59e0b"}
+}],
+annotations:[{
+x:x[Math.floor(x.length/2)],
+y:0.95,
+text:"PF Target",
+showarrow:false,
+font:{size:12}
+}],
+legend:{orientation:"h",y:-0.2}
 });
 }
 
