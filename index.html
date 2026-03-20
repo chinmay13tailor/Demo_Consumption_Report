@@ -23,41 +23,70 @@ body{
 .kpis{
   display:grid;
   grid-template-columns:repeat(5,1fr);
-  gap:14px;
+  gap:16px;
+  margin-top:10px;
 }
 
-.kpi{
-  background:#fff;
-  border-radius:14px;
-  padding:16px;
-  box-shadow:0 2px 8px rgba(0,0,0,.06);
-  transition:.2s;
+.kpi-card{
+  background:#ffffff;
+  border-radius:16px;
+  padding:16px 18px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06);
+  border:1px solid #e5e7eb;
+  transition:0.2s;
 }
 
-.kpi .title{
+/* Header */
+.kpi-header{
+  display:flex;
+  justify-content:space-between;
   font-size:13px;
   color:#6b7280;
   margin-bottom:6px;
 }
 
-.kpi .value{
+/* Value */
+.kpi-value{
   font-size:28px;
   font-weight:700;
   color:#111827;
 }
 
-/* Highlight cards */
-.kpi.blue{
-  background:#3b82f6;
-  color:#fff;
+/* Sub */
+.kpi-sub{
+  margin-top:4px;
+  font-size:12px;
+  color:#6b7280;
+  display:flex;
+  justify-content:space-between;
 }
-.kpi.yellow{
-  background:#f59e0b;
-  color:#fff;
+
+/* Trend */
+.trend{
+  color:#16a34a;
+  font-weight:600;
 }
-.kpi.red{
-  background:#ef4444;
-  color:#fff;
+
+/* Border highlight cards */
+.blue-border{
+  border:2px solid #3b82f6;
+}
+
+.yellow-border{
+  border:2px solid #f59e0b;
+  background:#fffbeb;
+}
+
+.red-border{
+  border:2px solid #ef4444;
+  background:#fef2f2;
+}
+
+/* Responsive */
+@media(max-width:1200px){
+  .kpis{
+    grid-template-columns:1fr 1fr;
+  }
 }
 
 /* Cards */
@@ -147,11 +176,53 @@ td{
 
 <!-- KPI -->
 <div class="kpis">
-<div class="kpi"><div class="title">Total Energy Consumption</div><div id="kpiEnergy" class="value">-</div></div>
-<div class="kpi"><div class="title">Average Power Demand</div><div id="kpiAvgPower" class="value">-</div></div>
-<div class="kpi blue"><div class="title">Maximum Power Demand</div><div id="kpiMaxPower" class="value">-</div></div>
-<div class="kpi yellow"><div class="title">Average Power Factor</div><div id="kpiAvgPF" class="value">-</div></div>
-<div class="kpi red"><div class="title">Minimum Power Factor</div><div id="kpiMinPF" class="value">-</div></div>
+
+  <div class="kpi-card">
+    <div class="kpi-header">
+      <span>Total Energy Consumption</span>
+      ⚡
+    </div>
+    <div class="kpi-value" id="kpiEnergy">8728.00</div>
+    <div class="kpi-sub">
+      <span>kWh</span>
+      <span class="trend">↗ 5.2%</span>
+    </div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-header">
+      <span>Average Power Demand</span>
+      📉
+    </div>
+    <div class="kpi-value" id="kpiAvgPower">222.29</div>
+    <div class="kpi-sub">kW</div>
+  </div>
+
+  <div class="kpi-card blue-border">
+    <div class="kpi-header">
+      <span>Maximum Power Demand</span>
+      📈
+    </div>
+    <div class="kpi-value">248.00</div>
+    <div class="kpi-sub">kW</div>
+  </div>
+
+  <div class="kpi-card yellow-border">
+    <div class="kpi-header">
+      <span>Average Power Factor</span>
+      🌀
+    </div>
+    <div class="kpi-value">0.95</div>
+  </div>
+
+  <div class="kpi-card red-border">
+    <div class="kpi-header">
+      <span>Minimum Power Factor</span>
+      ⚠️
+    </div>
+    <div class="kpi-value">0.86</div>
+  </div>
+
 </div>
 
 <!-- Charts -->
