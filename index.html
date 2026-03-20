@@ -16,7 +16,7 @@ body{
 
 .container{padding:20px}
 
-/* Top Controls */
+/* Controls */
 .controls{
   display:flex;
   gap:10px;
@@ -35,22 +35,50 @@ button{
   cursor:pointer;
 }
 
-/* KPI */
+/* KPI NEW DESIGN */
 .kpis{
   display:grid;
   grid-template-columns:repeat(5,1fr);
-  gap:15px;
+  gap:16px;
   margin-top:20px;
 }
 
-.card{
+.kpi-card{
   background:#fff;
-  padding:15px;
-  border-radius:12px;
-  box-shadow:0 4px 12px rgba(0,0,0,.1);
+  border-radius:14px;
+  padding:16px;
+  box-shadow:0 6px 14px rgba(0,0,0,0.08);
 }
 
-.value{font-size:22px;font-weight:bold}
+.kpi-header{
+  display:flex;
+  justify-content:space-between;
+  font-size:13px;
+  color:#666;
+  margin-bottom:8px;
+}
+
+.kpi-value{
+  font-size:28px;
+  font-weight:700;
+}
+
+.kpi-sub{
+  margin-top:6px;
+  font-size:13px;
+  color:#777;
+  display:flex;
+  justify-content:space-between;
+}
+
+.trend{color:#16a34a;font-weight:600}
+
+/* Borders */
+.energy{border:2px solid #3b82f6;}
+.power{border:2px solid #94a3b8;}
+.max{border:2px solid #2563eb;}
+.pf{border:2px solid #f59e0b;}
+.minpf{border:2px solid #ef4444;}
 
 /* Charts */
 .row{
@@ -60,7 +88,7 @@ button{
   margin-top:20px;
 }
 
-/* Phase Cards */
+/* Phase */
 .phase{
   display:grid;
   grid-template-columns:1fr 1fr 1fr;
@@ -95,26 +123,50 @@ th,td{
   <button onclick="generate()">Generate</button>
 </div>
 
-<!-- KPI -->
+<!-- KPI SECTION -->
 <div class="kpis">
-  <div class="card"><div>Total Energy</div><div id="kpiEnergy" class="value">-</div></div>
-  <div class="card"><div>Avg Power</div><div id="kpiAvgPower" class="value">-</div></div>
-  <div class="card"><div>Max Power</div><div id="kpiMaxPower" class="value">-</div></div>
-  <div class="card"><div>Avg PF</div><div id="kpiAvgPF" class="value">-</div></div>
-  <div class="card"><div>Min PF</div><div id="kpiMinPF" class="value">-</div></div>
+
+  <div class="kpi-card energy">
+    <div class="kpi-header">Total Energy ⚡</div>
+    <div id="kpiEnergy" class="kpi-value">-</div>
+    <div class="kpi-sub">kWh</div>
+  </div>
+
+  <div class="kpi-card power">
+    <div class="kpi-header">Avg Power 📉</div>
+    <div id="kpiAvgPower" class="kpi-value">-</div>
+    <div class="kpi-sub">kW</div>
+  </div>
+
+  <div class="kpi-card max">
+    <div class="kpi-header">Max Power 📈</div>
+    <div id="kpiMaxPower" class="kpi-value">-</div>
+    <div class="kpi-sub">kW</div>
+  </div>
+
+  <div class="kpi-card pf">
+    <div class="kpi-header">Avg PF 🌀</div>
+    <div id="kpiAvgPF" class="kpi-value">-</div>
+  </div>
+
+  <div class="kpi-card minpf">
+    <div class="kpi-header">Min PF ⚠️</div>
+    <div id="kpiMinPF" class="kpi-value">-</div>
+  </div>
+
 </div>
 
 <!-- Charts -->
 <div class="row">
-  <div class="card"><div id="energyChart" style="height:300px"></div></div>
-  <div class="card"><div id="powerChart" style="height:300px"></div></div>
+  <div class="kpi-card"><div id="energyChart" style="height:300px"></div></div>
+  <div class="kpi-card"><div id="powerChart" style="height:300px"></div></div>
 </div>
 
 <!-- Phase -->
 <div class="phase">
-  <div class="card" id="phaseR"></div>
-  <div class="card" id="phaseY"></div>
-  <div class="card" id="phaseB"></div>
+  <div class="kpi-card" id="phaseR"></div>
+  <div class="kpi-card" id="phaseY"></div>
+  <div class="kpi-card" id="phaseB"></div>
 </div>
 
 <!-- Table -->
@@ -142,13 +194,15 @@ const KEYS=[
 "Active_Power","Power_Factor",
 "Consumption_hourly","Production_hourly",
 "R_Voltage","Y_Voltage","B_Voltage",
-"RY_Voltage","YB_Voltage","BR_Voltage",
 "R_Phase_Current","Y_Phase_Current","B_Phase_Current",
 "THD_VoltageR","THD_VoltageY","THD_VoltageB",
 "THD_CurrentA","THD_CurrentB","THD_CurrentC"
 ];
 
-function num(v){return Number(v)||0;}
+function num(v){
+  const n=Number(v);
+  return Number.isFinite(n)?n:null;
+}
 
 async function fetchData(start,end){
 const url=`${API}/plugins/telemetry/DEVICE/${DEVICE_ID}/values/timeseries?keys=${KEYS.join(",")}&startTs=${start}&endTs=${end}&limit=50000&agg=NONE`;
@@ -163,7 +217,7 @@ return res.json();
 function merge(data){
 const map=new Map();
 Object.entries(data).forEach(([k,arr])=>{
-arr.forEach(p=>{
+(arr||[]).forEach(p=>{
 const t=p.ts;
 const row=map.get(t)||{ts:t};
 row[k]=num(p.value);
@@ -171,6 +225,22 @@ map.set(t,row);
 });
 });
 return [...map.values()].sort((a,b)=>a.ts-b.ts);
+}
+
+function avg(arr){return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;}
+function sum(arr){return arr.length?arr.reduce((a,b)=>a+b,0):0;}
+
+function generateKPIs(rows){
+
+const energy=rows.map(r=>r.Consumption_hourly).filter(v=>v!=null);
+const power=rows.map(r=>r.Active_Power).filter(v=>v!=null);
+const pf=rows.map(r=>r.Power_Factor).filter(v=>v!=null);
+
+document.getElementById("kpiEnergy").innerText=sum(energy).toFixed(2);
+document.getElementById("kpiAvgPower").innerText=avg(power).toFixed(2);
+document.getElementById("kpiMaxPower").innerText=power.length?Math.max(...power).toFixed(2):"0";
+document.getElementById("kpiAvgPF").innerText=avg(pf).toFixed(2);
+document.getElementById("kpiMinPF").innerText=pf.length?Math.min(...pf).toFixed(2):"0";
 }
 
 function groupHourly(rows){
@@ -182,10 +252,10 @@ const h=new Date(d.getFullYear(),d.getMonth(),d.getDate(),d.getHours()).getTime(
 
 const obj=map.get(h)||{ts:h,energy:0,production:0,power:[],pf:[]};
 
-obj.energy+=r.Consumption_hourly||0;
-obj.production+=r.Production_hourly||0;
-if(r.Active_Power) obj.power.push(r.Active_Power);
-if(r.Power_Factor) obj.pf.push(r.Power_Factor);
+if(r.Consumption_hourly!=null) obj.energy+=r.Consumption_hourly;
+if(r.Production_hourly!=null) obj.production+=r.Production_hourly;
+if(r.Active_Power!=null) obj.power.push(r.Active_Power);
+if(r.Power_Factor!=null) obj.pf.push(r.Power_Factor);
 
 map.set(h,obj);
 });
@@ -194,38 +264,23 @@ return [...map.values()].map(h=>({
 ts:h.ts,
 energy:h.energy,
 production:h.production,
-avgPower:h.power.reduce((a,b)=>a+b,0)/h.power.length||0,
-avgPF:h.pf.reduce((a,b)=>a+b,0)/h.pf.length||0
+avgPower:avg(h.power),
+avgPF:avg(h.pf)
 }));
-}
-
-function generateKPIs(rows){
-const energy=rows.map(r=>r.Consumption_hourly);
-const power=rows.map(r=>r.Active_Power);
-const pf=rows.map(r=>r.Power_Factor);
-
-document.getElementById("kpiEnergy").innerText=energy.reduce((a,b)=>a+b,0).toFixed(2);
-document.getElementById("kpiAvgPower").innerText=(power.reduce((a,b)=>a+b,0)/power.length).toFixed(2);
-document.getElementById("kpiMaxPower").innerText=Math.max(...power).toFixed(2);
-document.getElementById("kpiAvgPF").innerText=(pf.reduce((a,b)=>a+b,0)/pf.length).toFixed(2);
-document.getElementById("kpiMinPF").innerText=Math.min(...pf).toFixed(2);
 }
 
 function charts(hourly){
 const x=hourly.map(h=>new Date(h.ts));
 
 Plotly.newPlot("energyChart",[
-{ x,y:hourly.map(h=>h.energy),type:"bar",name:"Energy"},
-{ x,y:hourly.map(h=>h.production),type:"scatter",name:"Production",yaxis:"y2"}
+{ x:x,y:hourly.map(h=>h.energy),type:"bar",name:"Energy"},
+{ x:x,y:hourly.map(h=>h.production),type:"scatter",name:"Production",yaxis:"y2"}
 ],{yaxis:{title:"kWh"},yaxis2:{overlaying:"y",side:"right"}});
 
 Plotly.newPlot("powerChart",[
-{ x,y:hourly.map(h=>h.avgPower),name:"kW"},
-{ x,y:hourly.map(h=>h.avgPF),name:"PF",yaxis:"y2"}
-],{
-yaxis:{title:"kW"},
-yaxis2:{overlaying:"y",side:"right",range:[0,1]}
-});
+{ x:x,y:hourly.map(h=>h.avgPower),name:"kW",mode:"lines"},
+{ x:x,y:hourly.map(h=>h.avgPF),name:"PF",mode:"lines",yaxis:"y2"}
+],{yaxis:{title:"kW"},yaxis2:{overlaying:"y",side:"right",range:[0,1]}});
 }
 
 function table(hourly){
@@ -252,40 +307,44 @@ tb.appendChild(tr);
 }
 
 function phase(rows){
-const avg=(key)=>rows.reduce((a,b)=>a+(b[key]||0),0)/rows.length;
+function avgKey(key){
+return avg(rows.map(r=>r[key]).filter(v=>v!=null));
+}
 
 document.getElementById("phaseR").innerHTML=`
 <b>Phase R</b><br>
-Voltage: ${avg("R_Voltage").toFixed(1)} V<br>
-Current: ${avg("R_Phase_Current").toFixed(1)} A<br>
-THD V: ${avg("THD_VoltageR").toFixed(2)} %<br>
-THD I: ${avg("THD_CurrentA").toFixed(2)} %
+Voltage: ${avgKey("R_Voltage").toFixed(1)} V<br>
+Current: ${avgKey("R_Phase_Current").toFixed(1)} A<br>
+THD V: ${avgKey("THD_VoltageR").toFixed(2)} %<br>
+THD I: ${avgKey("THD_CurrentA").toFixed(2)} %
 `;
 
 document.getElementById("phaseY").innerHTML=`
 <b>Phase Y</b><br>
-Voltage: ${avg("Y_Voltage").toFixed(1)} V<br>
-Current: ${avg("Y_Phase_Current").toFixed(1)} A<br>
-THD V: ${avg("THD_VoltageY").toFixed(2)} %<br>
-THD I: ${avg("THD_CurrentB").toFixed(2)} %
+Voltage: ${avgKey("Y_Voltage").toFixed(1)} V<br>
+Current: ${avgKey("Y_Phase_Current").toFixed(1)} A<br>
+THD V: ${avgKey("THD_VoltageY").toFixed(2)} %<br>
+THD I: ${avgKey("THD_CurrentB").toFixed(2)} %
 `;
 
 document.getElementById("phaseB").innerHTML=`
 <b>Phase B</b><br>
-Voltage: ${avg("B_Voltage").toFixed(1)} V<br>
-Current: ${avg("B_Phase_Current").toFixed(1)} A<br>
-THD V: ${avg("THD_VoltageB").toFixed(2)} %<br>
-THD I: ${avg("THD_CurrentC").toFixed(2)} %
+Voltage: ${avgKey("B_Voltage").toFixed(1)} V<br>
+Current: ${avgKey("B_Phase_Current").toFixed(1)} A<br>
+THD V: ${avgKey("THD_VoltageB").toFixed(2)} %<br>
+THD I: ${avgKey("THD_CurrentC").toFixed(2)} %
 `;
 }
 
 async function generate(){
 const date=document.getElementById("dateInput").value;
+if(!date){alert("Select date");return;}
 
 const start=new Date(date+"T00:00:00").getTime();
 const end=new Date(date+"T23:59:59").getTime();
 
 const data=await fetchData(start,end);
+
 const rows=merge(data);
 const hourly=groupHourly(rows);
 
