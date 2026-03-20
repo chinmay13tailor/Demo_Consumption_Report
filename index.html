@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>Energy Report</title>
@@ -8,103 +8,113 @@
 <style>
 body{
   font-family:Segoe UI;
-  background:#f5f7fa;
+  background:#eef2f6;
   margin:0;
 }
 
-/* Layout spacing */
 .container{
   padding:20px;
   display:flex;
   flex-direction:column;
-  gap:20px; /* spacing between sections */
+  gap:20px;
 }
 
-/* Controls */
+/* CONTROLS */
 .controls{
   background:#fff;
-  padding:15px;
+  padding:12px;
   border-radius:12px;
-  box-shadow:0 4px 10px rgba(0,0,0,.08);
+  display:flex;
+  gap:10px;
 }
 
 /* KPI */
 .kpis{
   display:grid;
   grid-template-columns:repeat(5,1fr);
-  gap:16px;
+  gap:15px;
 }
 
-.kpi-card{
+.kpi{
   background:#fff;
+  border-radius:14px;
   padding:15px;
-  border-radius:12px;
   box-shadow:0 4px 10px rgba(0,0,0,.08);
 }
 
-.kpi-value{font-size:24px;font-weight:700}
+.kpi .title{font-size:13px;color:#666}
+.kpi .value{font-size:26px;font-weight:700}
+.kpi.blue{border:2px solid #3b82f6}
+.kpi.yellow{border:2px solid #f59e0b}
+.kpi.red{border:2px solid #ef4444}
 
-/* Charts */
+/* CHARTS */
 .row{
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:20px;
 }
 
-.chart-card{
+.card{
   background:#fff;
+  border-radius:14px;
   padding:15px;
-  border-radius:12px;
   box-shadow:0 4px 10px rgba(0,0,0,.08);
 }
 
-/* Phase full width */
-.phase-title{
-  font-weight:600;
-}
-
+/* PHASE */
 .phase{
   display:grid;
   grid-template-columns:1fr 1fr 1fr;
   gap:20px;
-  width:100%;
 }
 
 .phase-card{
-  padding:20px;
+  padding:15px;
   border-radius:14px;
-  box-shadow:0 4px 12px rgba(0,0,0,.08);
+  box-shadow:0 4px 10px rgba(0,0,0,.08);
 }
 
-.phaseR{background:#fde2e2}
-.phaseY{background:#fff6d6}
-.phaseB{background:#e2ecff}
+.phaseR{background:#ffe5e5}
+.phaseY{background:#fff7d6}
+.phaseB{background:#e5edff}
 
-/* Bars */
-.bar{
-  height:6px;
-  background:#ddd;
-  border-radius:6px;
-  margin:6px 0;
-}
+/* bars */
+.bar{height:6px;background:#ddd;border-radius:6px;margin:6px 0}
 .fill{height:100%;border-radius:6px}
 .red{background:#ef4444}
 .yellow{background:#f59e0b}
 .blue{background:#3b82f6}
 
-/* Table */
+/* TABLE */
+.table-card{
+  background:#fff;
+  border-radius:14px;
+  padding:15px;
+  box-shadow:0 4px 10px rgba(0,0,0,.08);
+}
+
 table{
   width:100%;
   border-collapse:collapse;
-  background:#fff;
-  border-radius:10px;
 }
-th,td{
+
+th{
+  background:#f3f4f6;
   padding:10px;
-  border-bottom:1px solid #ddd;
+  font-size:13px;
+}
+
+td{
+  padding:10px;
+  border-bottom:1px solid #eee;
   text-align:center;
 }
-th{background:#f3f4f6}
+
+/* PF COLOR */
+.good{color:green;font-weight:600}
+.bad{color:red;font-weight:600}
+.warn{color:orange;font-weight:600}
 
 </style>
 </head>
@@ -120,30 +130,28 @@ th{background:#f3f4f6}
 
 <!-- KPI -->
 <div class="kpis">
-<div class="kpi-card"><div>Total Energy</div><div id="kpiEnergy" class="kpi-value">-</div></div>
-<div class="kpi-card"><div>Avg Power</div><div id="kpiAvgPower" class="kpi-value">-</div></div>
-<div class="kpi-card"><div>Max Power</div><div id="kpiMaxPower" class="kpi-value">-</div></div>
-<div class="kpi-card"><div>Avg PF</div><div id="kpiAvgPF" class="kpi-value">-</div></div>
-<div class="kpi-card"><div>Min PF</div><div id="kpiMinPF" class="kpi-value">-</div></div>
+<div class="kpi"><div class="title">Total Energy Consumption</div><div id="kpiEnergy" class="value">-</div></div>
+<div class="kpi"><div class="title">Average Power Demand</div><div id="kpiAvgPower" class="value">-</div></div>
+<div class="kpi blue"><div class="title">Maximum Power Demand</div><div id="kpiMaxPower" class="value">-</div></div>
+<div class="kpi yellow"><div class="title">Average Power Factor</div><div id="kpiAvgPF" class="value">-</div></div>
+<div class="kpi red"><div class="title">Minimum Power Factor</div><div id="kpiMinPF" class="value">-</div></div>
 </div>
 
 <!-- Charts -->
 <div class="row">
-
-<div class="chart-card">
+<div class="card">
 <h4>Hourly Energy vs Production</h4>
 <div id="energyChart"></div>
 </div>
 
-<div class="chart-card">
+<div class="card">
 <h4>Power Demand & Power Factor Trend</h4>
 <div id="powerChart"></div>
 </div>
-
 </div>
 
-<!-- Phase -->
-<div class="phase-title">Phase-wise Electrical Analysis</div>
+<!-- PHASE -->
+<h4>Phase-wise Electrical Analysis</h4>
 
 <div class="phase">
 <div class="phase-card phaseR" id="phaseR"></div>
@@ -151,19 +159,22 @@ th{background:#f3f4f6}
 <div class="phase-card phaseB" id="phaseB"></div>
 </div>
 
-<!-- Table -->
+<!-- TABLE -->
+<div class="table-card">
+<h4>Detailed Hourly Analysis</h4>
 <table>
 <thead>
 <tr>
 <th>Time</th>
-<th>Energy</th>
-<th>Avg Power</th>
-<th>PF</th>
+<th>Energy (kWh)</th>
+<th>Avg Demand (kW)</th>
+<th>Power Factor</th>
 <th>Production</th>
 </tr>
 </thead>
 <tbody id="tableBody"></tbody>
 </table>
+</div>
 
 </div>
 
@@ -210,31 +221,14 @@ const arr=rows.filter(r=>r[key]!=null).sort((a,b)=>b.ts-a.ts);
 return arr.length?arr[0][key]:0;
 }
 
-/* KPI */
-function generateKPIs(rows){
-const power=rows.map(r=>r.Active_Power).filter(v=>v!=null);
-const pf=rows.map(r=>r.Power_Factor).filter(v=>v!=null);
-
-const energy=getLatest(rows,"Today_Consumption");
-
-document.getElementById("kpiEnergy").innerText=energy.toFixed(2);
-document.getElementById("kpiAvgPower").innerText=avg(power).toFixed(2);
-document.getElementById("kpiMaxPower").innerText=Math.max(...power).toFixed(2);
-document.getElementById("kpiAvgPF").innerText=avg(pf).toFixed(2);
-document.getElementById("kpiMinPF").innerText=Math.min(...pf).toFixed(2);
-}
-
-/* Hourly */
 function groupHourly(rows){
 const map=new Map();
-
 rows.forEach(r=>{
 const d=new Date(r.ts);
 const h=new Date(d.getFullYear(),d.getMonth(),d.getDate(),d.getHours()).getTime();
-
 const obj=map.get(h)||{ts:h,energy:0,production:0,power:[],pf:[]};
 
-if(r.Consumption_hourly!=null) obj.energy=r.Consumption_hourly; // FIXED
+if(r.Consumption_hourly!=null) obj.energy=r.Consumption_hourly;
 if(r.Production_hourly!=null) obj.production=r.Production_hourly;
 if(r.Active_Power!=null) obj.power.push(r.Active_Power);
 if(r.Power_Factor!=null) obj.pf.push(r.Power_Factor);
@@ -251,60 +245,69 @@ avgPF:avg(h.pf)
 }));
 }
 
-/* Charts FIXED */
 function charts(hourly){
 const x=hourly.map(h=>new Date(h.ts));
 
 Plotly.newPlot("energyChart",[
-{
-x:x,
-y:hourly.map(h=>h.energy),
-type:"bar",
-name:"Consumption (kWh)"
-},
-{
-x:x,
-y:hourly.map(h=>h.production),
-type:"scatter",
-name:"Production",
-yaxis:"y2"
-}
-],
-{
-yaxis:{title:"kWh"},
-yaxis2:{overlaying:"y",side:"right"},
-legend:{orientation:"h"}
-});
+{ x,y:hourly.map(h=>h.energy),type:"bar",name:"Consumption (kWh)"},
+{ x,y:hourly.map(h=>h.production),type:"scatter",name:"Production",yaxis:"y2"}
+]);
 
-/* Power trend */
 Plotly.newPlot("powerChart",[
-{
-x:x,
-y:hourly.map(h=>h.avgPower),
-name:"kW",
-mode:"lines"
-},
-{
-x:x,
-y:hourly.map(h=>h.avgPF),
-name:"PF",
-mode:"lines",
-yaxis:"y2"
-}
+{ x,y:hourly.map(h=>h.avgPower),name:"kW",mode:"lines"},
+{ x,y:hourly.map(h=>h.avgPF),name:"PF",mode:"lines",yaxis:"y2"}
 ],
 {
 yaxis:{title:"kW"},
 yaxis2:{overlaying:"y",side:"right",range:[0.8,1]},
-shapes:[{
-type:"line",
-y0:0.95,y1:0.95,
-x0:x[0],x1:x.at(-1),
-line:{dash:"dot",color:"orange"}
-}]
+shapes:[{type:"line",y0:0.95,y1:0.95,x0:x[0],x1:x.at(-1),line:{dash:"dot"}}]
 });
 }
 
-/* Generate */
+function phase(rows){
+function avgKey(k){return avg(rows.map(r=>r[k]).filter(v=>v!=null));}
+function bar(v,max,color){
+return `<div class="bar"><div class="fill ${color}" style="width:${Math.min(v/max*100,100)}%"></div></div>`;
+}
+
+document.getElementById("phaseR").innerHTML=`🔴 Phase R<br>
+Voltage ${avgKey("R_Voltage").toFixed(1)} V ${bar(avgKey("R_Voltage"),250,"red")}
+Current ${avgKey("R_Phase_Current").toFixed(1)} A ${bar(avgKey("R_Phase_Current"),100,"red")}
+`;
+
+document.getElementById("phaseY").innerHTML=`🟡 Phase Y<br>
+Voltage ${avgKey("Y_Voltage").toFixed(1)} V ${bar(avgKey("Y_Voltage"),250,"yellow")}
+Current ${avgKey("Y_Phase_Current").toFixed(1)} A ${bar(avgKey("Y_Phase_Current"),100,"yellow")}
+`;
+
+document.getElementById("phaseB").innerHTML=`🔵 Phase B<br>
+Voltage ${avgKey("B_Voltage").toFixed(1)} V ${bar(avgKey("B_Voltage"),250,"blue")}
+Current ${avgKey("B_Phase_Current").toFixed(1)} A ${bar(avgKey("B_Phase_Current"),100,"blue")}
+`;
+}
+
+function table(hourly){
+const tb=document.getElementById("tableBody");
+tb.innerHTML="";
+hourly.forEach(h=>{
+let pfClass=h.avgPF>0.95?"good":h.avgPF<0.9?"bad":"warn";
+
+const tr=document.createElement("tr");
+[
+new Date(h.ts).getHours()+":00",
+h.energy.toFixed(2),
+h.avgPower.toFixed(2),
+`<span class="${pfClass}">${h.avgPF.toFixed(2)}</span>`,
+h.production.toFixed(0)
+].forEach(v=>{
+const td=document.createElement("td");
+td.innerHTML=v;
+tr.appendChild(td);
+});
+tb.appendChild(tr);
+});
+}
+
 async function generate(){
 const date=document.getElementById("dateInput").value;
 if(!date){alert("Select date");return;}
@@ -316,8 +319,15 @@ const data=await fetchData(start,end);
 const rows=merge(data);
 const hourly=groupHourly(rows);
 
-generateKPIs(rows);
+document.getElementById("kpiEnergy").innerText=getLatest(rows,"Today_Consumption").toFixed(2);
+document.getElementById("kpiAvgPower").innerText=avg(rows.map(r=>r.Active_Power).filter(v=>v!=null)).toFixed(2);
+document.getElementById("kpiMaxPower").innerText=Math.max(...rows.map(r=>r.Active_Power||0)).toFixed(2);
+document.getElementById("kpiAvgPF").innerText=avg(rows.map(r=>r.Power_Factor).filter(v=>v!=null)).toFixed(2);
+document.getElementById("kpiMinPF").innerText=Math.min(...rows.map(r=>r.Power_Factor||1)).toFixed(2);
+
 charts(hourly);
+phase(rows);
+table(hourly);
 }
 </script>
 
