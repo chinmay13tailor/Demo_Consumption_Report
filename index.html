@@ -351,33 +351,37 @@ avgPF:avg(h.pf)
 
 function charts(hourly){
 
+if(!hourly || hourly.length === 0){
+  console.log("No hourly data");
+  return;
+}
+
 const x = hourly.map(h => new Date(h.ts));
 
 /* ------------------ ENERGY CHART ------------------ */
 Plotly.newPlot("energyChart",[
 {
   x:x,
-  y:hourly.map(h=>h.energy),
+  y:hourly.map(h=>h.energy || 0),
   type:"bar",
   name:"Consumption (kWh)",
   marker:{
-    color:"#3b82f6",
-    borderRadius:4
+    color:"#3b82f6"
   }
 },
 {
   x:x,
-  y:hourly.map(h=>h.production),
+  y:hourly.map(h=>h.production || 0),
   type:"scatter",
   name:"Production (Nos)",
   yaxis:"y2",
   mode:"lines+markers",
   line:{color:"#10b981",width:2},
-  marker:{size:6}
+  marker:{size:5}
 }
 ],
 {
-  height:300,
+  height:320,
   margin:{l:40,r:40,t:10,b:40},
   paper_bgcolor:"#fff",
   plot_bgcolor:"#fff",
@@ -400,11 +404,11 @@ Plotly.newPlot("energyChart",[
 
   legend:{
     orientation:"h",
-    y:-0.25,
+    y:-0.2,
     x:0.3
   }
 },
-{displaylogo:false}
+{displaylogo:false,responsive:true}
 );
 
 
@@ -412,14 +416,14 @@ Plotly.newPlot("energyChart",[
 Plotly.newPlot("powerChart",[
 {
   x:x,
-  y:hourly.map(h=>h.avgPower),
+  y:hourly.map(h=>h.avgPower || 0),
   name:"Active Power (kW)",
   mode:"lines",
-  line:{color:"#3b82f6",width:2}
+  line:{color:"#2563eb",width:2}
 },
 {
   x:x,
-  y:hourly.map(h=>h.avgPF),
+  y:hourly.map(h=>h.avgPF || 0),
   name:"Power Factor",
   mode:"lines",
   yaxis:"y2",
@@ -427,7 +431,7 @@ Plotly.newPlot("powerChart",[
 }
 ],
 {
-  height:300,
+  height:320,
   margin:{l:40,r:40,t:10,b:40},
   paper_bgcolor:"#fff",
   plot_bgcolor:"#fff",
@@ -450,12 +454,11 @@ Plotly.newPlot("powerChart",[
     title:"PF"
   },
 
-  /* PF target line */
   shapes:[
     {
       type:"line",
       x0:x[0],
-      x1:x.at(-1),
+      x1:x[x.length-1],
       y0:0.95,
       y1:0.95,
       line:{
@@ -478,11 +481,11 @@ Plotly.newPlot("powerChart",[
 
   legend:{
     orientation:"h",
-    y:-0.25,
+    y:-0.2,
     x:0.25
   }
 },
-{displaylogo:false}
+{displaylogo:false,responsive:true}
 );
 
 }
