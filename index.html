@@ -101,7 +101,21 @@ body{
 .row{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:18px;
+  gap:16px;
+}
+
+.chart-card{
+  background:#ffffff;
+  border-radius:16px;
+  padding:16px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06);
+}
+
+.chart-title{
+  font-size:14px;
+  font-weight:600;
+  color:#111827;
+  margin-bottom:10px;
 }
 
 /* Phase */
@@ -227,15 +241,17 @@ td{
 
 <!-- Charts -->
 <div class="row">
-<div class="card">
-<h4>Hourly Energy vs Production</h4>
-<div id="energyChart"></div>
-</div>
 
-<div class="card">
-<h4>Power Demand & Power Factor Trend</h4>
-<div id="powerChart"></div>
-</div>
+  <div class="chart-card">
+    <div class="chart-title">Hourly Energy vs Production</div>
+    <div id="energyChart"></div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Power Demand & Power Factor Trend</div>
+    <div id="powerChart"></div>
+  </div>
+
 </div>
 
 <!-- PHASE -->
@@ -334,73 +350,141 @@ avgPF:avg(h.pf)
 }
 
 function charts(hourly){
-const x=hourly.map(h=>new Date(h.ts));
 
+const x = hourly.map(h => new Date(h.ts));
+
+/* ------------------ ENERGY CHART ------------------ */
 Plotly.newPlot("energyChart",[
 {
-x,
-y:hourly.map(h=>h.energy),
-type:"bar",
-name:"Consumption (kWh)",
-marker:{color:"#3b82f6"}
+  x:x,
+  y:hourly.map(h=>h.energy),
+  type:"bar",
+  name:"Consumption (kWh)",
+  marker:{
+    color:"#3b82f6",
+    borderRadius:4
+  }
 },
 {
-x,
-y:hourly.map(h=>h.production),
-type:"scatter",
-name:"Production (Nos)",
-yaxis:"y2",
-line:{color:"#10b981",width:2}
+  x:x,
+  y:hourly.map(h=>h.production),
+  type:"scatter",
+  name:"Production (Nos)",
+  yaxis:"y2",
+  mode:"lines+markers",
+  line:{color:"#10b981",width:2},
+  marker:{size:6}
 }
 ],
 {
-margin:{l:40,r:40,t:10,b:30},
-paper_bgcolor:"#fff",
-plot_bgcolor:"#fff",
-yaxis:{gridcolor:"#e5e7eb"},
-yaxis2:{overlaying:"y",side:"right"},
-legend:{orientation:"h",y:-0.2}
-});
+  height:300,
+  margin:{l:40,r:40,t:10,b:40},
+  paper_bgcolor:"#fff",
+  plot_bgcolor:"#fff",
 
-/* Power chart */
+  xaxis:{
+    showgrid:true,
+    gridcolor:"#e5e7eb",
+    tickformat:"%H:%M"
+  },
+
+  yaxis:{
+    title:"",
+    gridcolor:"#e5e7eb"
+  },
+
+  yaxis2:{
+    overlaying:"y",
+    side:"right"
+  },
+
+  legend:{
+    orientation:"h",
+    y:-0.25,
+    x:0.3
+  }
+},
+{displaylogo:false}
+);
+
+
+/* ------------------ POWER CHART ------------------ */
 Plotly.newPlot("powerChart",[
 {
-x,
-y:hourly.map(h=>h.avgPower),
-name:"Active Power (kW)",
-mode:"lines",
-line:{color:"#2563eb",width:2}
+  x:x,
+  y:hourly.map(h=>h.avgPower),
+  name:"Active Power (kW)",
+  mode:"lines",
+  line:{color:"#3b82f6",width:2}
 },
 {
-x,
-y:hourly.map(h=>h.avgPF),
-name:"Power Factor",
-mode:"lines",
-yaxis:"y2",
-line:{color:"#7c3aed",width:2}
+  x:x,
+  y:hourly.map(h=>h.avgPF),
+  name:"Power Factor",
+  mode:"lines",
+  yaxis:"y2",
+  line:{color:"#7c3aed",width:2}
 }
 ],
 {
-margin:{l:40,r:40,t:10,b:30},
-paper_bgcolor:"#fff",
-plot_bgcolor:"#fff",
-yaxis:{title:"kW",gridcolor:"#e5e7eb"},
-yaxis2:{overlaying:"y",side:"right",range:[0.8,1]},
-shapes:[{
-type:"line",
-y0:0.95,y1:0.95,
-x0:x[0],x1:x.at(-1),
-line:{dash:"dot",color:"#f59e0b"}
-}],
-annotations:[{
-x:x[Math.floor(x.length/2)],
-y:0.95,
-text:"PF Target",
-showarrow:false,
-font:{size:12}
-}],
-legend:{orientation:"h",y:-0.2}
-});
+  height:300,
+  margin:{l:40,r:40,t:10,b:40},
+  paper_bgcolor:"#fff",
+  plot_bgcolor:"#fff",
+
+  xaxis:{
+    showgrid:true,
+    gridcolor:"#e5e7eb",
+    tickformat:"%H:%M"
+  },
+
+  yaxis:{
+    title:"kW",
+    gridcolor:"#e5e7eb"
+  },
+
+  yaxis2:{
+    overlaying:"y",
+    side:"right",
+    range:[0.8,1],
+    title:"PF"
+  },
+
+  /* PF target line */
+  shapes:[
+    {
+      type:"line",
+      x0:x[0],
+      x1:x.at(-1),
+      y0:0.95,
+      y1:0.95,
+      line:{
+        dash:"dot",
+        color:"#f59e0b",
+        width:2
+      }
+    }
+  ],
+
+  annotations:[
+    {
+      x:x[Math.floor(x.length/2)],
+      y:0.95,
+      text:"PF Target",
+      showarrow:false,
+      font:{size:12,color:"#6b7280"}
+    }
+  ],
+
+  legend:{
+    orientation:"h",
+    y:-0.25,
+    x:0.25
+  }
+},
+{displaylogo:false}
+);
+
 }
 
 function phase(rows){
