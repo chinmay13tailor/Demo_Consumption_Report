@@ -59,11 +59,11 @@ td{padding:10px;text-align:center;border-bottom:1px solid #e5e7eb}
 <div class="page">
 
 <div class="kpi-row">
-<div class="kpi"><div class="kpi-title">Total Energy</div><div class="kpi-value" id="totalEnergy"></div></div>
-<div class="kpi"><div class="kpi-title">Avg Power</div><div class="kpi-value" id="avgPower"></div></div>
-<div class="kpi"><div class="kpi-title">Max Demand</div><div class="kpi-value" id="maxPower"></div></div>
-<div class="kpi"><div class="kpi-title">Avg PF</div><div class="kpi-value" id="avgPF"></div></div>
-<div class="kpi"><div class="kpi-title">Min PF</div><div class="kpi-value" id="minPF"></div></div>
+<div class="kpi"><div class="kpi-title">Total Energy Consumption</div><div class="kpi-value" id="totalEnergy">--</div></div>
+<div class="kpi"><div class="kpi-title">Average Power Demand</div><div class="kpi-value" id="avgPower">--</div></div>
+<div class="kpi"><div class="kpi-title">Maximum Power Demand</div><div class="kpi-value" id="maxPower">--</div></div>
+<div class="kpi"><div class="kpi-title">Average Power Factor</div><div class="kpi-value" id="avgPF">--</div></div>
+<div class="kpi"><div class="kpi-title">Minimum Power Factor</div><div class="kpi-value" id="minPF">--</div></div>
 </div>
 
 <div class="chart-row">
@@ -90,7 +90,11 @@ const API="https://plantwiz.pimateck.in/api";
 const TOKEN=new URLSearchParams(location.search).get("token");
 
 const KEYS=[
-"Active_Power","Power_Factor","Consumption_hourly","Production_hourly",
+"Today_Consumption",
+"Active_Power",
+"Power_Factor",
+"Consumption_hourly",
+"Production_hourly",
 "R_Voltage","Y_Voltage","B_Voltage",
 "R_Phase_Current","Y_Phase_Current","B_Phase_Current",
 "THD_VoltageR","THD_VoltageY","THD_VoltageB",
@@ -123,6 +127,9 @@ map[p.ts][k]=num(p.value);
 
 let rows=Object.values(map).sort((a,b)=>a.ts-b.ts);
 
+/* SAFE AVG */
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+
 /* KPI */
 let power=[],pf=[];
 rows.forEach(r=>{
@@ -130,15 +137,14 @@ if(r.Active_Power) power.push(r.Active_Power);
 if(r.Power_Factor) pf.push(r.Power_Factor);
 });
 
-const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
-
-let uniqueEnergy={}
+/* UNIQUE ENERGY */
+let energyMap={}
 rows.forEach(r=>{
 let h=new Date(r.ts).getHours();
-if(r.Consumption_hourly!==undefined) uniqueEnergy[h]=r.Consumption_hourly;
+if(r.Consumption_hourly!==undefined) energyMap[h]=r.Consumption_hourly;
 });
 
-let energy=Object.values(uniqueEnergy).reduce((a,b)=>a+b,0);
+let energy=Object.values(energyMap).reduce((a,b)=>a+b,0);
 
 totalEnergy.innerText=energy.toFixed(2);
 avgPower.innerText=avg(power).toFixed(2);
@@ -146,7 +152,7 @@ maxPower.innerText=Math.max(...power).toFixed(2);
 avgPF.innerText=avg(pf).toFixed(2);
 minPF.innerText=Math.min(...pf).toFixed(2);
 
-/* HOURLY MAP */
+/* HOURLY GROUP */
 let hourly={};
 rows.forEach(r=>{
 let h=new Date(r.ts).getHours();
@@ -167,50 +173,98 @@ let en=Object.values(hourly).map(d=>d.energy);
 Plotly.newPlot("prodEnergyChart",[
 {x:labels,y:prod,type:"bar",name:"Production"},
 {x:labels,y:en,type:"line",name:"Energy",yaxis:"y2"}
-],{title:"Production vs Energy",yaxis2:{overlaying:"y",side:"right"}});
+],{
+title:"Hourly Energy vs Production",
+yaxis:{title:"Production"},
+yaxis2:{overlaying:"y",side:"right",title:"kWh"}
+});
 
-/* TREND (HOURLY AVG) */
+/* TREND HOURLY AVG */
 let tPower=Object.values(hourly).map(d=>avg(d.power));
 let tPF=Object.values(hourly).map(d=>avg(d.pf));
 
 Plotly.newPlot("trendChart",[
-{x:labels,y:tPower,name:"Power",mode:"lines+markers"},
-{x:labels,y:tPF,name:"PF",yaxis:"y2",mode:"lines+markers"}
-],{yaxis2:{overlaying:"y",side:"right",range:[0.8,1]}});
+{x:labels,y:tPower,name:"Active Power (kW)",mode:"lines+markers"},
+{x:labels,y:tPF,name:"Power Factor",yaxis:"y2",mode:"lines+markers"}
+],{
+title:"Power Demand & Power Factor Trend",
+yaxis:{title:"kW"},
+yaxis2:{overlaying:"y",side:"right",range:[0.8,1]}
+});
 
 /* TABLE */
-let html=`<tr><th>Time</th><th>Energy</th><th>Avg Power</th><th>PF</th><th>Production</th></tr>`;
+let html=`<tr>
+<th>Time</th>
+<th>Energy (kWh)</th>
+<th>Avg Demand (kW)</th>
+<th>Power Factor</th>
+<th>Production</th>
+</tr>`;
+
 Object.entries(hourly).forEach(([h,d])=>{
 html+=`<tr>
 <td>${h}:00</td>
 <td>${d.energy}</td>
 <td>${avg(d.power).toFixed(2)}</td>
-<td>${avg(d.pf).toFixed(2)}</td>
+<td style="color:${avg(d.pf)<0.9?'red':'green'}">${avg(d.pf).toFixed(2)}</td>
 <td>${d.prod}</td>
 </tr>`;
 });
+
 table.innerHTML=html;
 
-/* PHASE UI */
+/* PHASE UI (FULL) */
 let last=rows[rows.length-1];
 
-function phaseCard(title,color,line,current,thdV,thdC){
-return `<div style="background:${color}15;padding:16px;border-radius:16px">
-<b style="color:${color}">● ${title}</b><br><br>
-Voltage: ${line} V<br>
-Current: ${current} A<br><br>
-THD Voltage: <span style="color:${thdV>3?'orange':'green'}">${thdV}%</span><br>
-THD Current: <span style="color:${thdC>3?'orange':'green'}">${thdC}%</span>
-</div>`
+function phaseCard(title,color,data){
+return `
+<div style="background:${color}15;border-radius:16px;padding:16px">
+<div style="color:${color};font-weight:600;margin-bottom:10px">● ${title}</div>
+
+<div>Avg Line Voltage <b style="float:right">${data.line} V</b></div>
+
+<div style="margin-top:10px">Avg Phase Voltage <b style="float:right">${data.phase} V</b></div>
+<div style="height:6px;background:#ddd;border-radius:6px;margin:6px 0">
+<div style="width:${data.phase/3}%;background:${color};height:100%;border-radius:6px"></div>
+</div>
+
+<div>Phase Current <b style="float:right">${data.current} A</b></div>
+<div style="height:6px;background:#ddd;border-radius:6px;margin:6px 0">
+<div style="width:${data.current}%;background:${color};height:100%;border-radius:6px"></div>
+</div>
+
+<div>THD Voltage <span style="float:right;color:${data.thdV>3?'orange':'green'}">${data.thdV}%</span></div>
+<div>THD Current <span style="float:right;color:${data.thdC>3?'orange':'green'}">${data.thdC}%</span></div>
+</div>`;
 }
 
-phaseR.innerHTML=phaseCard("Phase R","#ef4444",last.R_Voltage,last.R_Phase_Current,last.THD_VoltageR,last.THD_CurrentA);
-phaseY.innerHTML=phaseCard("Phase Y","#eab308",last.Y_Voltage,last.Y_Phase_Current,last.THD_VoltageY,last.THD_CurrentB);
-phaseB.innerHTML=phaseCard("Phase B","#3b82f6",last.B_Voltage,last.B_Phase_Current,last.THD_VoltageB,last.THD_CurrentC);
+phaseR.innerHTML=phaseCard("Phase R","#ef4444",{
+line:last.R_Voltage,
+phase:last.R_Voltage,
+current:last.R_Phase_Current,
+thdV:last.THD_VoltageR||0,
+thdC:last.THD_CurrentA||0
+});
+
+phaseY.innerHTML=phaseCard("Phase Y","#eab308",{
+line:last.Y_Voltage,
+phase:last.Y_Voltage,
+current:last.Y_Phase_Current,
+thdV:last.THD_VoltageY||0,
+thdC:last.THD_CurrentB||0
+});
+
+phaseB.innerHTML=phaseCard("Phase B","#3b82f6",{
+line:last.B_Voltage,
+phase:last.B_Voltage,
+current:last.B_Phase_Current,
+thdV:last.THD_VoltageB||0,
+thdC:last.THD_CurrentC||0
+});
 
 }
 
-document.getElementById("date").value=new Date().toISOString().split("T")[0];
+document.getElementById("date").value=new Date().toISOString().split("T")[0;
 
 </script>
 
