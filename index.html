@@ -6,109 +6,41 @@
 <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
 
 <style>
-body{
-  font-family:Segoe UI;
-  background:#eef2f6;
-  margin:0;
-}
+body{font-family:Segoe UI;background:#eef2f6;margin:0}
+.container{padding:18px;display:flex;flex-direction:column;gap:18px}
 
-.container{
-  padding:18px;
-  display:flex;
-  flex-direction:column;
-  gap:18px;
-}
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.kpi-card{background:#fff;border-radius:16px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
 
-/* KPI SAME (UNCHANGED) */
-.kpis{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:16px;
-}
+/* Charts */
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.chart-card{background:#fff;border-radius:14px;padding:16px}
+#energyChart,#powerChart{height:320px}
 
-.kpi-card{
-  background:#fff;
-  border-radius:16px;
-  padding:16px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.06);
-  border:1px solid #e5e7eb;
-}
+/* Phase */
+.phase{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.phase-card{padding:16px;border-radius:14px}
+.phaseR{background:#fde2e2}
+.phaseY{background:#fff7cc}
+.phaseB{background:#e2ecff}
 
-.kpi-header{
-  display:flex;
-  justify-content:space-between;
-  font-size:13px;
-  color:#6b7280;
-}
+/* Bars */
+.bar{height:6px;background:#ddd;border-radius:5px;margin:6px 0}
+.fill{height:100%;border-radius:5px}
+.red{background:#ef4444}
+.yellow{background:#f59e0b}
+.blue{background:#3b82f6}
 
-.kpi-value{
-  font-size:28px;
-  font-weight:700;
-}
-
-/* CHART */
-.row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
-}
-
-.chart-card{
-  background:#fff;
-  border-radius:14px;
-  padding:16px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.06);
-}
-
-#energyChart,#powerChart{
-  height:320px;
-}
-
-/* PHASE */
-.phase{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:16px;
-}
-
-.phase-card{
-  padding:16px;
-  border-radius:14px;
-  background:#fff;
-  box-shadow:0 2px 8px rgba(0,0,0,.06);
-}
-
-/* TABLE */
-.table-card{
-  background:#fff;
-  border-radius:14px;
-  padding:16px;
-  box-shadow:0 2px 8px rgba(0,0,0,.06);
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th{
-  background:#f3f4f6;
-  padding:10px;
-}
-
-td{
-  padding:10px;
-  border-bottom:1px solid #eee;
-}
-
-.good{color:green}
-.bad{color:red}
-.warn{color:orange}
+/* Table */
+.table-card{background:#fff;border-radius:14px;padding:16px}
+th{background:#f3f4f6;padding:10px;font-size:12px}
+td{padding:10px;border-bottom:1px solid #eee}
+.good{color:green}.bad{color:red}.warn{color:orange}
 </style>
 </head>
 
 <body>
-
 <div class="container">
 
 <input type="date" id="dateInput">
@@ -116,51 +48,32 @@ td{
 
 <!-- KPI -->
 <div class="kpis">
-<div class="kpi-card">
-<div class="kpi-header">Total Energy</div>
-<div class="kpi-value" id="kpiEnergy">0</div>
+<div class="kpi-card"><div id="kpiEnergy">0</div></div>
+<div class="kpi-card"><div id="kpiAvgPower">0</div></div>
+<div class="kpi-card"><div id="kpiMaxPower">0</div></div>
+<div class="kpi-card"><div id="kpiAvgPF">0</div></div>
+<div class="kpi-card"><div id="kpiMinPF">0</div></div>
 </div>
 
-<div class="kpi-card">
-<div class="kpi-header">Avg Power</div>
-<div class="kpi-value" id="kpiAvgPower">0</div>
-</div>
-
-<div class="kpi-card">
-<div class="kpi-header">Max Power</div>
-<div class="kpi-value" id="kpiMaxPower">0</div>
-</div>
-
-<div class="kpi-card">
-<div class="kpi-header">Avg PF</div>
-<div class="kpi-value" id="kpiAvgPF">0</div>
-</div>
-
-<div class="kpi-card">
-<div class="kpi-header">Min PF</div>
-<div class="kpi-value" id="kpiMinPF">0</div>
-</div>
-</div>
-
-<!-- CHART -->
+<!-- Charts -->
 <div class="row">
 <div class="chart-card"><div id="energyChart"></div></div>
 <div class="chart-card"><div id="powerChart"></div></div>
 </div>
 
-<!-- PHASE -->
+<!-- Phase -->
 <div class="phase">
-<div class="phase-card" id="phaseR"></div>
-<div class="phase-card" id="phaseY"></div>
-<div class="phase-card" id="phaseB"></div>
+<div class="phase-card phaseR" id="phaseR"></div>
+<div class="phase-card phaseY" id="phaseY"></div>
+<div class="phase-card phaseB" id="phaseB"></div>
 </div>
 
-<!-- TABLE -->
+<!-- Table -->
 <div class="table-card">
 <table>
 <thead>
 <tr>
-<th>Time</th><th>Energy</th><th>Power</th><th>PF</th><th>Prod</th>
+<th>Time</th><th>Energy</th><th>Power</th><th>PF</th><th>Production</th>
 </tr>
 </thead>
 <tbody id="tableBody"></tbody>
@@ -174,51 +87,104 @@ const API="https://plantwiz.pimateck.in/api";
 const DEVICE_ID="991cf500-661a-11f0-90f1-775fee303094";
 const TOKEN=new URLSearchParams(location.search).get("token");
 
+const KEYS=[
+"Active_Power","Power_Factor",
+"Consumption_hourly","Production_hourly",
+"Today_Consumption",
+"R_Voltage","Y_Voltage","B_Voltage",
+"R_Phase_Current","Y_Phase_Current","B_Phase_Current"
+];
+
 function avg(arr){return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;}
 
 async function generate(){
 
 const date=document.getElementById("dateInput").value;
-if(!date)return;
+if(!date){alert("Select date");return;}
 
 const start=new Date(date+"T00:00:00").getTime();
 const end=new Date(date+"T23:59:59").getTime();
 
-const url=`${API}/plugins/telemetry/DEVICE/${DEVICE_ID}/values/timeseries?keys=Active_Power,Power_Factor,Consumption_hourly,Production_hourly,Today_Consumption&startTs=${start}&endTs=${end}&limit=50000`;
+const url=`${API}/plugins/telemetry/DEVICE/${DEVICE_ID}/values/timeseries?keys=${KEYS.join(",")}&startTs=${start}&endTs=${end}&limit=50000`;
 
 const res=await fetch(url,{headers:{"X-Authorization":`Bearer ${TOKEN}`}});
 const data=await res.json();
 
-const rows=[];
-Object.values(data).forEach(arr=>{
-arr.forEach(p=>rows.push({ts:p.ts,val:Number(p.value)}));
+/* -------- MERGE -------- */
+const map={};
+Object.entries(data).forEach(([k,arr])=>{
+(arr||[]).forEach(p=>{
+if(!map[p.ts]) map[p.ts]={ts:p.ts};
+map[p.ts][k]=Number(p.value);
+});
+});
+const rows=Object.values(map);
+
+/* -------- KPI -------- */
+const today = rows.filter(r=>r.Today_Consumption).slice(-1)[0];
+document.getElementById("kpiEnergy").innerText=today?today.Today_Consumption.toFixed(2):0;
+
+const powers=rows.map(r=>r.Active_Power).filter(Boolean);
+document.getElementById("kpiAvgPower").innerText=avg(powers).toFixed(2);
+document.getElementById("kpiMaxPower").innerText=Math.max(...powers,0).toFixed(2);
+
+const pf=rows.map(r=>r.Power_Factor).filter(Boolean);
+document.getElementById("kpiAvgPF").innerText=avg(pf).toFixed(2);
+document.getElementById("kpiMinPF").innerText=Math.min(...pf,1).toFixed(2);
+
+/* -------- HOURLY -------- */
+const hourly={};
+rows.forEach(r=>{
+const d=new Date(r.ts);
+const h=d.getHours();
+if(!hourly[h]) hourly[h]={energy:0,prod:0,p:[],pf:[]};
+
+if(r.Consumption_hourly) hourly[h].energy=r.Consumption_hourly;
+if(r.Production_hourly) hourly[h].prod=r.Production_hourly;
+if(r.Active_Power) hourly[h].p.push(r.Active_Power);
+if(r.Power_Factor) hourly[h].pf.push(r.Power_Factor);
 });
 
-if(rows.length===0){
-alert("No data");
-return;
-}
+const hours=Object.keys(hourly).sort((a,b)=>a-b);
 
-/* KPI */
-document.getElementById("kpiEnergy").innerText="OK";
+const energy=hours.map(h=>hourly[h].energy||0);
+const prod=hours.map(h=>hourly[h].prod||0);
+const pwr=hours.map(h=>avg(hourly[h].p));
+const pfv=hours.map(h=>avg(hourly[h].pf));
 
-/* DEMO CHART */
-Plotly.newPlot("energyChart",[{
-x:[1,2,3],y:[10,20,30],type:"bar"
-}]);
+/* -------- CHART -------- */
+Plotly.newPlot("energyChart",[
+{ x:hours, y:energy, type:"bar", name:"Consumption"},
+{ x:hours, y:prod, type:"scatter", name:"Production", yaxis:"y2"}
+],
+{ yaxis2:{overlaying:"y",side:"right"} });
 
-Plotly.newPlot("powerChart",[{
-x:[1,2,3],y:[5,10,15]
-}]);
+Plotly.newPlot("powerChart",[
+{ x:hours, y:pwr, name:"kW"},
+{ x:hours, y:pfv, name:"PF", yaxis:"y2"}
+],
+{ yaxis2:{overlaying:"y",side:"right"} });
 
-/* PHASE */
-document.getElementById("phaseR").innerText="Phase R Data";
-document.getElementById("phaseY").innerText="Phase Y Data";
-document.getElementById("phaseB").innerText="Phase B Data";
+/* -------- PHASE -------- */
+function avgKey(k){return avg(rows.map(r=>r[k]).filter(Boolean));}
 
-/* TABLE */
+document.getElementById("phaseR").innerHTML=`Voltage ${avgKey("R_Voltage").toFixed(1)} | Current ${avgKey("R_Phase_Current").toFixed(1)}`;
+document.getElementById("phaseY").innerHTML=`Voltage ${avgKey("Y_Voltage").toFixed(1)} | Current ${avgKey("Y_Phase_Current").toFixed(1)}`;
+document.getElementById("phaseB").innerHTML=`Voltage ${avgKey("B_Voltage").toFixed(1)} | Current ${avgKey("B_Phase_Current").toFixed(1)}`;
+
+/* -------- TABLE -------- */
 const tb=document.getElementById("tableBody");
-tb.innerHTML="<tr><td>00:00</td><td>10</td><td>5</td><td>0.9</td><td>100</td></tr>";
+tb.innerHTML="";
+hours.forEach(h=>{
+const tr=document.createElement("tr");
+tr.innerHTML=`
+<td>${h}:00</td>
+<td>${hourly[h].energy||0}</td>
+<td>${avg(hourly[h].p).toFixed(2)}</td>
+<td>${avg(hourly[h].pf).toFixed(2)}</td>
+<td>${hourly[h].prod||0}</td>`;
+tb.appendChild(tr);
+});
 }
 </script>
 
