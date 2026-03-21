@@ -34,6 +34,13 @@ button{padding:10px 18px;border:none;border-radius:10px;background:#2D8A6D;color
 
 /* PHASE */
 .phase-row{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:20px}
+  .section-title{
+  margin-top:25px;
+  margin-bottom:10px;
+  font-size:16px;
+  font-weight:600;
+  color:#1f2937;
+}
 
 /* TABLE */
 .table-card{background:#fff;border-radius:16px;padding:20px;margin-top:20px}
@@ -71,6 +78,7 @@ td{padding:10px;text-align:center;border-bottom:1px solid #e5e7eb}
 <div class="chart-card"><div id="trendChart"></div></div>
 </div>
 
+<div class="section-title">Phase-wise Electrical Analysis</div>
 <div class="phase-row">
 <div id="phaseR"></div>
 <div id="phaseY"></div>
@@ -218,24 +226,58 @@ let last=rows[rows.length-1];
 
 function phaseCard(title,color,data){
 return `
-<div style="background:${color}15;border-radius:16px;padding:16px">
-<div style="color:${color};font-weight:600;margin-bottom:10px">● ${title}</div>
+<div style="
+  background:${color}15;
+  border-radius:16px;
+  padding:20px;
+  min-height:190px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  box-shadow:0 6px 12px rgba(0,0,0,0.06)
+">
 
-<div>Avg Line Voltage <b style="float:right">${data.line} V</b></div>
+<div>
+  <div style="color:${color};font-weight:600;margin-bottom:12px">
+    ● ${title}
+  </div>
 
-<div style="margin-top:10px">Avg Phase Voltage <b style="float:right">${data.phase} V</b></div>
-<div style="height:6px;background:#ddd;border-radius:6px;margin:6px 0">
-<div style="width:${data.phase/3}%;background:${color};height:100%;border-radius:6px"></div>
+  <div>Avg Line Voltage <b style="float:right">${data.line} V</b></div>
+
+  <div style="margin-top:10px">
+    Avg Phase Voltage 
+    <b style="float:right">${data.phase} V</b>
+  </div>
+
+  <div style="height:6px;background:#ddd;border-radius:6px;margin:6px 0">
+    <div style="width:${data.phase/3}%;background:${color};height:100%;border-radius:6px"></div>
+  </div>
+
+  <div>Phase Current <b style="float:right">${data.current} A</b></div>
+
+  <div style="height:6px;background:#ddd;border-radius:6px;margin:6px 0">
+    <div style="width:${data.current}%;background:${color};height:100%;border-radius:6px"></div>
+  </div>
 </div>
 
-<div>Phase Current <b style="float:right">${data.current} A</b></div>
-<div style="height:6px;background:#ddd;border-radius:6px;margin:6px 0">
-<div style="width:${data.current}%;background:${color};height:100%;border-radius:6px"></div>
+<div style="margin-top:10px">
+  <div>
+    THD Voltage 
+    <span style="float:right;color:${data.thdV>3?'orange':'green'}">
+      ${data.thdV}% ${data.thdV>3?'Warning':'Normal'}
+    </span>
+  </div>
+
+  <div>
+    THD Current 
+    <span style="float:right;color:${data.thdC>3?'orange':'green'}">
+      ${data.thdC}% ${data.thdC>3?'Warning':'Normal'}
+    </span>
+  </div>
 </div>
 
-<div>THD Voltage <span style="float:right;color:${data.thdV>3?'orange':'green'}">${data.thdV}%</span></div>
-<div>THD Current <span style="float:right;color:${data.thdC>3?'orange':'green'}">${data.thdC}%</span></div>
-</div>`;
+</div>
+`;
 }
 
 phaseR.innerHTML=phaseCard("Phase R","#ef4444",{
