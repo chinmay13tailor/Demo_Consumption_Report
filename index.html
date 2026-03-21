@@ -338,11 +338,54 @@ margin:{t:40}
 table.innerHTML=html;
 
 /* PHASE */
-let last=rows[rows.length-1];
+function phaseCard(title,color,data){
 
-phaseR.innerHTML=`Phase R<br>Voltage: ${last.R_Voltage}<br>Current: ${last.R_Phase_Current}`;
-phaseY.innerHTML=`Phase Y<br>Voltage: ${last.Y_Voltage}<br>Current: ${last.Y_Phase_Current}`;
-phaseB.innerHTML=`Phase B<br>Voltage: ${last.B_Voltage}<br>Current: ${last.B_Phase_Current}`;
+  const thdV = data.thdV || 0;
+  const thdC = data.thdC || 0;
+
+  return `
+  <div style="
+    background:${color}15;
+    border-radius:16px;
+    padding:16px;
+    box-shadow:0 6px 12px rgba(0,0,0,0.06);
+  ">
+    
+    <div style="font-weight:600;color:${color};margin-bottom:10px">
+      ● ${title}
+    </div>
+
+    <div>Avg Line Voltage <b style="float:right">${data.line} V</b></div>
+    
+    <div style="margin-top:10px">Avg Phase Voltage 
+      <b style="float:right">${data.phase} V</b>
+    </div>
+    <div style="height:6px;background:#ddd;border-radius:6px;margin:6px 0">
+      <div style="width:${data.phase/3}%;background:${color};height:100%;border-radius:6px"></div>
+    </div>
+
+    <div>Phase Current <b style="float:right">${data.current} A</b></div>
+    <div style="height:6px;background:#ddd;border-radius:6px;margin:6px 0">
+      <div style="width:${data.current}%;background:${color};height:100%;border-radius:6px"></div>
+    </div>
+
+    <div style="margin-top:10px">
+      THD Voltage 
+      <span style="float:right;color:${thdV>3?'orange':'green'}">
+        ${thdV}% ${thdV>3?'Warning':'Normal'}
+      </span>
+    </div>
+
+    <div>
+      THD Current 
+      <span style="float:right;color:${thdC>3?'orange':'green'}">
+        ${thdC}% ${thdC>3?'Warning':'Normal'}
+      </span>
+    </div>
+
+  </div>
+  `;
+}
 
 }
 
