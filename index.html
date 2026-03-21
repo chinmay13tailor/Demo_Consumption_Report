@@ -275,27 +275,64 @@ yaxis2:{overlaying:"y",side:"right"}
 });
 
 /* TREND */
-Plotly.newPlot("trendChart",[
-{x:rows.map(r=>new Date(r.ts)),y:rows.map(r=>r.Active_Power),name:"Power"},
-{x:rows.map(r=>new Date(r.ts)),y:rows.map(r=>r.Power_Factor),name:"PF",yaxis:"y2"}
-],{
-yaxis:{title:"kW"},
-yaxis2:{overlaying:"y",side:"right",range:[0.8,1]}
+/* ===== HOURLY AVG FOR TREND ===== */
+
+let trendHourly = {};
+
+rows.forEach(r=>{
+  let h = new Date(r.ts).getHours();
+
+  if(!trendHourly[h]){
+    trendHourly[h] = {
+      power: [],
+      pf: []
+    };
+  }
+
+  if(r.Active_Power)
+    trendHourly[h].power.push(r.Active_Power);
+
+  if(r.Power_Factor)
+    trendHourly[h].pf.push(r.Power_Factor);
 });
 
-/* TABLE */
-let html=`<tr>
-<th>Time</th><th>Energy</th><th>Avg Power</th><th>PF</th><th>Production</th>
-</tr>`;
+const avg = arr => arr.length
+  ? arr.reduce((a,b)=>a+b,0)/arr.length
+  : 0;
 
-Object.entries(hourly).forEach(([h,d])=>{
-html+=`<tr>
-<td>${h}:00</td>
-<td>${d.energy}</td>
-<td>${avg(d.power).toFixed(2)}</td>
-<td>${avg(d.pf).toFixed(2)}</td>
-<td>${d.prod}</td>
-</tr>`;
+let tLabels = Object.keys(trendHourly).map(h => h + ":00");
+
+let tPower = Object.values(trendHourly).map(d => avg(d.power));
+let tPF = Object.values(trendHourly).map(d => avg(d.pf));
+
+/* ===== CHART ===== */
+Plotly.newPlot("trendChart",[
+{
+  x: tLabels,
+  y: tPower,
+  name:"Active Power (kW)",
+  mode:"lines+markers",
+  line:{color:"#3b82f6", width:3}
+},
+{
+  x: tLabels,
+  y: tPF,
+  name:"Power Factor",
+  yaxis:"y2",
+  mode:"lines+markers",
+  line:{color:"#8b5cf6", width:3}
+}
+],
+{
+title:"Power Demand & Power Factor Trend",
+yaxis:{title:"kW"},
+yaxis2:{
+  overlaying:"y",
+  side:"right",
+  range:[0.8,1],
+  title:"PF"
+},
+margin:{t:40}
 });
 
 table.innerHTML=html;
