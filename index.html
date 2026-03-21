@@ -212,10 +212,10 @@ let html=`<tr>
 Object.entries(hourly).forEach(([h,d])=>{
 html+=`<tr>
 <td>${h}:00</td>
-<td>${d.energy}</td>
+<td>${Number(d.energy || 0).toFixed(2)}</td>
 <td>${avg(d.power).toFixed(2)}</td>
 <td style="color:${avg(d.pf)<0.9?'red':'green'}">${avg(d.pf).toFixed(2)}</td>
-<td>${d.prod}</td>
+<td>${Number(d.prod || 0).toFixed(0)}</td>
 </tr>`;
 });
 
